@@ -271,6 +271,51 @@ body.danger #vig{background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 28%
   #toast{top:64px}
 }
 
+/* ==================== 试玩改版新增样式 ==================== */
+/* 情境化教学浮层 */
+#teach{position:fixed;inset:0;z-index:260;display:none;align-items:center;justify-content:center;
+  background:rgba(6,3,2,.84);backdrop-filter:blur(3px);padding:16px}
+#teach.on{display:flex}
+#teach .tin{width:min(540px,94vw);padding:24px 24px 20px;text-align:center;
+  background:linear-gradient(170deg,#33200f,#180d06);border:1px solid #b5392a;border-radius:14px;
+  box-shadow:0 26px 70px rgba(0,0,0,.8),0 0 46px rgba(224,84,63,.18) inset;animation:pop .32s ease-out}
+#teach .tt{color:#ffc96a;font-size:19px;letter-spacing:.2em;margin-bottom:12px;text-shadow:0 0 18px rgba(255,201,106,.45)}
+#teach .tb{color:#e8d5ae;font-size:14.5px;line-height:2.1;white-space:pre-line;text-align:left}
+#teach .btn{margin-top:18px}
+/* 锁界面常驻操作条（浮在弹窗之上，保证永不死锁） */
+#lockBar{position:fixed;right:14px;bottom:16px;z-index:210;display:none;gap:8px;flex-wrap:wrap;
+  justify-content:flex-end;max-width:min(460px,94vw)}
+#lockBar button{padding:9px 17px;border:1px solid #b5392a;border-radius:999px;background:rgba(28,14,7,.95);
+  color:#f6e3bf;font-size:13px;letter-spacing:.12em;box-shadow:0 6px 20px rgba(0,0,0,.7);transition:.18s}
+#lockBar button:hover{border-color:#ffc96a;color:#ffc96a;box-shadow:0 0 22px rgba(255,201,106,.4)}
+#lockBar button:disabled{opacity:.45;cursor:not-allowed}
+#lockBar b{color:#ffc96a;font-weight:400}
+/* 回忆线索列表（层级高于转轮锁，边看线索边拨轮） */
+#mRecall{z-index:230}
+#mRecall .card{max-height:82vh}
+.recall{border-top:1px dashed #4a3220;padding:11px 0}
+.recall:first-child{border-top:none}
+.recall .rt{color:#ffc96a;font-size:13.5px;letter-spacing:.12em;margin-bottom:5px}
+.recall .rb{color:#c9ab7d;font-size:12.5px;line-height:1.95;white-space:pre-line}
+/* 转轮提示高亮 */
+.dial.hintglow{border-color:#ffc96a!important;box-shadow:0 0 26px rgba(255,201,106,.9);color:#fff3cc;
+  animation:hintPulse .6s ease-in-out 3}
+@keyframes hintPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.13)}}
+/* 屏风参考图 */
+#refWrap{position:fixed;right:12px;top:60px;z-index:29;display:none;padding:7px 8px 8px;
+  border:1px solid #8a6534;border-radius:10px;background:rgba(20,11,5,.94);
+  box-shadow:0 10px 28px rgba(0,0,0,.7);width:min(210px,38vw)}
+#refWrap .rlb{color:#c8a674;font-size:10.5px;letter-spacing:.18em;margin-bottom:5px;text-align:center}
+#refImg{display:block;width:100%;border-radius:6px;border:1px solid #5d3f22;background:#120a05}
+#refClose{position:absolute;right:3px;top:-10px;width:21px;height:21px;border-radius:50%;
+  border:1px solid #8a6534;background:#2a1a0f;color:#c8a674;font-size:13px;line-height:1}
+#refClose:hover{color:#ffc96a;border-color:#ffc96a}
+.ibtn.off{opacity:.45}
+@media (max-width:640px){
+  #refWrap{width:min(140px,36vw);top:108px;right:6px;padding:5px 6px 6px}
+  #lockBar{right:6px;bottom:8px;gap:6px}#lockBar button{padding:7px 12px;font-size:12px}
+  #teach .tb{font-size:13.5px;line-height:1.95}
+}
 </style>
 </head>
 <body>
@@ -290,6 +335,7 @@ body.danger #vig{background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 28%
     <button class="tbtn" id="btnDex">记忆图鉴</button>
     <button class="tbtn" id="btnTrial">试炼 · 玛瑙之心</button>
     <button class="tbtn" id="btnSound">音效：开</button>
+    <button class="tbtn" id="btnBgm2">音乐：开</button>
     <button class="tbtn" id="btnWipe">清空存档</button>
   </div>
   <div class="rankline" id="rankLine"></div>
@@ -310,6 +356,8 @@ body.danger #vig{background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 28%
       <span class="hbar"><span class="hfill" id="hHeartFill"></span></span>
     </span>
     <button class="ibtn" id="btnHint">提示 <b id="hHint">3</b></button>
+    <button class="ibtn" id="btnRef">参考图</button>
+    <button class="ibtn" id="btnBgm">音乐：开</button>
     <button class="ibtn" id="btnDex2">图鉴</button>
     <button class="ibtn" id="btnMenu">菜单</button>
   </div>
@@ -348,6 +396,12 @@ body.danger #vig{background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 28%
   <div class="row"><button class="btn" id="clClose">收好</button></div>
 </div></div>
 
+<!-- 回忆线索（P0：锁界面可回看全部线索，消灭软锁死） -->
+<div class="modal" id="mRecall"><div class="card">
+  <h3>回忆线索</h3><div class="sub" id="rcSum"></div><div id="rcList"></div>
+  <div class="row"><button class="btn min" id="rcHow">看玩法</button><button class="btn" id="rcClose">收好</button></div>
+</div></div>
+
 <!-- 转轮锁 -->
 <div class="modal" id="mCipher"><div class="card">
   <h3 id="cTitle">木匣 · 五转轮锁</h3><div class="sub" id="cHint"></div>
@@ -355,7 +409,7 @@ body.danger #vig{background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 28%
   <div class="dialbtn"><span id="dUp">▲</span><span id="dDn">▼</span></div>
   <div class="keypad" id="keypad"></div>
   <div id="pwin"></div>
-  <div class="row"><button class="btn min" id="cClose">退回</button><button class="btn" id="cOk">开锁</button></div>
+  <div class="row"><button class="btn min" id="cClose">回主菜单</button><button class="btn" id="cOk">开锁</button></div>
 </div></div>
 
 <!-- 结算 -->
@@ -389,14 +443,36 @@ body.danger #vig{background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 28%
     <li><b>三 · 转轮密锁</b>：拼完屏风，锁才认得路。按线索里的顺序拨数字转轮（点转轮选中，用 ▲▼ 或下方数字键），点对即开。</li>
     <li><b>心象值</b>：连续做对会积攒心象，满值进入「心象清晰」——画面变亮、积分翻倍、灯油耗得慢。连续做错会黯淡，画面发暗。</li>
     <li><b>第三章规矩</b>：中间十字五片是旧屏风主纹，得按仪式顺序来：中心 → 上 → 下 → 左 → 右。顺序错了，片会烫一下。</li>
-    <li><b>提示</b>：每章有限次提示。寻光阶段点它，灯会自己去照未找到的记号；拼图阶段点它，会高亮一片碎片的归属格。</li>
+    <li><b>提示</b>：每章有限次提示。寻光阶段点它，灯会自己去照未找到的记号；拼图阶段点它，会高亮一片碎片的归属格；<b>转轮密锁阶段点它，会亮出一位转轮上正确的数字</b>。</li>
+    <li><b>回忆线索（重要）</b>：屏风拼合的一刻，纹路里会浮出关键线索；进了锁界面，右下角常驻「回忆线索」，随时能回看本章全部线索。<b>密码从来不靠你背</b>——快进跳过旁白也不要紧。</li>
+    <li><b>参考图</b>：拼图阶段右上角可开「屏风全貌」。初探者档默认给（可关掉）；寻路者档要花一次提示才打开；心象者档与试炼关不给。</li>
     <li><b>暗潮</b>：寻光途中会忽然压来一阵暗潮——灯焰缩成豆大、灯油翻倍地烧。此时会飞散出发光的<b>余烬</b>，点住它就能驱散暗潮、回一点灯油、白得一笔积分。</li>
-    <li><b>连击会凉</b>：手一慢，连击就往下掉（困难 7 秒、普通 9 秒不动手即掉一级）。放错碎片还要倒扣时限，别乱点。</li>
+    <li><b>连击会凉</b>：手一慢，连击就往下掉（困难 7 秒、普通 9 秒、简单 13 秒不动手即掉一级）。放错碎片还要倒扣时限，别乱点。</li>
     <li><b>锁会咬人</b>：普通与困难难度下，开锁失败时锁膛里的铜屑会<b>拨乱一位转轮</b>；困难档只有 3 次机会。</li>
-    <li><b>评级</b>：S / A / B / C 由用时、连击、失误、提示数共同决定，对应称号「玛瑙之心 / 补城人 / 拾碎者 / 路过的人」。通关后解锁「试炼 · 玛瑙之心」——最多六十四片，限时，只靠手感。</li>
+    <li><b>评级</b>：S / A / B / C 由用时、连击、失误、提示数共同决定，对应称号「玛瑙之心 / 补城人 / 拾碎者 / 路过的人」。通关后解锁「试炼 · 玛瑙之心」——最多四十九片，限时，只靠手感。</li>
   </ul>
   <div class="row"><button class="btn" id="howClose">明白了</button></div>
 </div></div>
+
+<!-- 情境化教学浮层 -->
+<div id="teach"><div class="tin">
+  <div class="tt" id="teachT"></div><div class="tb" id="teachB"></div>
+  <button class="btn" id="teachOk">明白了</button>
+</div></div>
+
+<!-- 锁界面常驻操作条：回忆线索 / 提示 / 重开锁 -->
+<div id="lockBar">
+  <button id="lbRecall">回忆线索</button>
+  <button id="lbHint">提示 <b id="lbHintN">0</b></button>
+  <button id="lbCipher">重开锁</button>
+</div>
+
+<!-- 屏风参考图（初探者默认给，寻路者花提示换，心象者不给） -->
+<div id="refWrap">
+  <div class="rlb">屏风全貌 · 参考</div>
+  <img id="refImg" alt="参考图">
+  <button id="refClose" aria-label="关闭参考图">×</button>
+</div>
 
 <div id="flash"></div>
 <div id="toast"></div>
@@ -427,6 +503,7 @@ const CH = [
     {fx:.24,fy:.76,label:'搪瓷缸',text:'缸壁印着「安全生产」，茶垢厚厚一层。\n爷爷说，井口的茶，凉了也喝。'},
     {fx:.76,fy:.78,label:'长条凳',text:'凳面磨得发亮，夜班工人就坐这儿等罐笼下来。\n凳腿上有五道刻痕，一道比一道深。'}],
   decoy:['井壁上的水痕','断了的刻刀','熄了的炉子'],
+  cipherRecall:'屏风纹路里浮出两行字——\n①老赵 ②孙工 ③李师傅 ④柱子 ⑤扁担刘\n老赵三盏 · 孙工一盏 · 李师傅四盏 · 柱子六盏 · 扁担刘两盏\n（按墙上照片 ①→⑤ 的顺序，把每人名下的灯点数连成五位数）',
   cipher:[
     {who:'小拾',t:'匣子「咔」的一声。里面没有钱，是一张卷了边的照片，和一本记着灯数的账。'},
     {who:'小拾',t:'灯给人照过路，人就得替灯记着路。——这话是爷爷说的。'}],
@@ -454,6 +531,7 @@ const CH = [
     {fx:.50,fy:.44,label:'透明拓片',text:'拓片上一条虚线，从「口」字门出发：\n婶儿 → 眼镜 → 麻叔 → 老姑。\n旁注小字：「每摊一句行话，句尾那个数才是真的。」'},
     {fx:.50,fy:.85,label:'音乐盒',text:'四位孔键，铜片发乌。\n路线上的四个数，按顺序压进去。'}],
   decoy:['地上的糖纸','空了的筐','睡熟的猫'],
+  cipherRecall:'屏风纹路里浮出拓片上那条虚线——\n婶儿 → 眼镜 → 麻叔 → 老姑\n婶儿「十块三串」· 眼镜「二回还价」· 麻叔「一两换一两」· 老姑「九头牛不换」\n（每摊一句行话，句尾那个数才是真的，按路线连成四位数）',
   cipher:[
     {who:'小拾',t:'音乐盒转起来了。调子很旧，是集市收摊前那一遍。'},
     {who:'小拾',t:'婶儿说过：牌子挂在嘴里，认货的听声就来。'}],
@@ -479,6 +557,7 @@ const CH = [
     {fx:.50,fy:.46,label:'老照片 · 全家福',text:'照片边角卷了。爷爷站在铺子门口，身后是整扇屏风。\n背面写着：「城记事儿那年，我八岁。」'},
     {fx:.50,fy:.86,label:'屏风底座',text:'四位凹槽，刻痕很深。\n内侧一行小字：「这座城记事儿那年。」'}],
   decoy:['窗台上的灰','旧纸箱','掉漆的暖气管'],
+  cipherRecall:'屏风纹路里浮出一张发黄的《东北日报》残页——\n报头日期：一九四九年十月一日\n照片背面小字：「城记事儿那年，我八岁。」\n（底座是四位凹槽：这座城记事儿那年）',
   cipher:[
     {who:'小拾',t:'一九四九。凹槽合上，底座弹开一格，里面是一小片玛瑙，红得像刚从砂盘上拿下来。'},
     {who:'小拾',t:'城记事儿那年，爷爷八岁。我今年，也差不多这么大。'}],
@@ -510,7 +589,7 @@ const CROSS_NAME = {center:'中心',up:'上',down:'下',left:'左',right:'右'};
 /* ============ 难度 ============ */
 const DIFFS = [
  {key:'easy',  cls:'e', name:'初探者', sub:'简 单', drain:2.3, lamp:188, fuelBack:24, rotate:false,
-  decoys:1, hints:4, tries:99, scoreMul:1.0,  desc:'灯油缓耗 · 1 假记号 · 碎片不歪'},
+  decoys:1, hints:6, tries:99, scoreMul:1.0,  desc:'灯油缓耗 · 1 假记号 · 碎片不歪 · 送屏风参考图 · 提示 6 次'},
  {key:'normal',cls:'n', name:'寻路者', sub:'普 通', drain:3.7, lamp:148, fuelBack:18, rotate:true,
   decoys:3, hints:3, tries:99, scoreMul:1.45, desc:'灯油急耗 · 3 假记号会游动 · 碎片歪斜 · 暗潮来袭'},
  {key:'hard',  cls:'h', name:'心象者', sub:'困 难', drain:5.6, lamp:110, fuelBack:13, rotate:true,
@@ -526,7 +605,8 @@ const S = {
   time:0, timeLimit:0, score:0, combo:1, bestCombo:1, errors:0, hints:3,
   heart:0, echo:false, echoT:0, tries:99, cipherAns:'', idle:0, lastFind:0,
   save:null, runStart:0, phaseStart:0, muted:false, dials:[], selDial:0,
-  lampShake:0, tide:0, tideT:18, lastAct:0
+  lampShake:0, tide:0, tideT:18, lastAct:0,
+  taught:{}, refShown:false, bgmOn:true, cipherHelped:0
 };
 const C = {gold:'#c89a55', red:'#b5392a', redB:'#e0543f', cream:'#f3e6d0', amber:'#ffc96a'};
 const $ = id => document.getElementById(id);
@@ -560,6 +640,124 @@ const SFX = {
   fail:  ()=>{ [330,247,165].forEach((f,i)=>setTimeout(()=>tone(f,0.4,'sine',0.06),i*160)); },
   tick:  ()=>tone(1200,0.04,'square',0.025)
 };
+
+
+/* ============ 改版新增：背景音乐（WebAudio 生成，无外部素材，单文件可跑） ============ */
+/* 严格在玩家点击难度卡（用户手势）之后才启动，绕开 Chrome/Safari 自动播放拦截 */
+const BGM={started:false,gain:null,filt:null,drone:[],timer:null,dark:false,next:0};
+const BGM_SCALE=[220,261.63,293.66,329.63,392.00,440.00,523.25];
+function bgmVol(){ return (S.bgmOn && !S.muted) ? (BGM.dark?0.10:0.28) : 0.0001; }
+function bgmStart(){
+  const a=actx(); if(!a) return;
+  if(!BGM.started){
+    BGM.started=true;
+    BGM.gain=a.createGain(); BGM.gain.gain.value=0.0001;
+    BGM.filt=a.createBiquadFilter(); BGM.filt.type='lowpass';
+    BGM.filt.frequency.value=2300; BGM.filt.Q.value=0.5;
+    BGM.gain.connect(BGM.filt); BGM.filt.connect(a.destination);
+    [[55,'sine',0.085],[82.41,'sine',0.055],[110,'triangle',0.030]].forEach(cfg=>{
+      const o=a.createOscillator(), g=a.createGain();
+      o.type=cfg[1]; o.frequency.value=cfg[0]; g.gain.value=cfg[2];
+      o.connect(g); g.connect(BGM.gain); o.start(); BGM.drone.push(o);
+    });
+    BGM.gain.gain.linearRampToValueAtTime(bgmVol(), a.currentTime+3.2);
+    BGM.next=a.currentTime+1.5;
+    BGM.timer=setInterval(bgmSchedule,200);
+  }
+  if(a.state==='suspended') a.resume().catch(()=>{});
+  BGM.gain.gain.setTargetAtTime(bgmVol(), a.currentTime, 0.7);
+}
+function bgmSchedule(){
+  const a=AC; if(!a||!BGM.started||!BGM.gain) return;
+  while(BGM.next < a.currentTime+0.7){
+    if(S.bgmOn && !S.muted){
+      const n=BGM_SCALE[Math.floor(Math.random()*BGM_SCALE.length)]*(BGM.dark?0.5:1);
+      const t0=BGM.next, v=BGM.dark?0.018:0.034;
+      const o=a.createOscillator(), g=a.createGain();
+      o.type='sine'; o.frequency.value=n;
+      g.gain.setValueAtTime(0.0001,t0); g.gain.linearRampToValueAtTime(v,t0+0.3);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+2.6);
+      o.connect(g); g.connect(BGM.gain); o.start(t0); o.stop(t0+2.8);
+      if(Math.random()<0.32){ const o2=a.createOscillator(), g2=a.createGain();
+        o2.type='triangle'; o2.frequency.value=n*2;
+        g2.gain.setValueAtTime(0.0001,t0+0.2); g2.gain.linearRampToValueAtTime(v*0.42,t0+0.55);
+        g2.gain.exponentialRampToValueAtTime(0.0001,t0+2.1);
+        o2.connect(g2); g2.connect(BGM.gain); o2.start(t0+0.2); o2.stop(t0+2.3); }
+    }
+    BGM.next += BGM.dark?1.0:1.7;
+  }
+}
+/* 暗潮时 BGM 压低 + 切暗 */
+function bgmDark(on){
+  BGM.dark=on; if(!AC||!BGM.gain||!BGM.filt) return;
+  BGM.gain.gain.setTargetAtTime(bgmVol(), AC.currentTime, 0.4);
+  BGM.filt.frequency.setTargetAtTime(on?400:2300, AC.currentTime, 0.5);
+}
+function syncBgmBtn(){
+  const t='音乐：'+(S.bgmOn&&!S.muted?'开':'关');
+  const a=$('btnBgm'), b=$('btnBgm2');
+  if(a){ a.textContent=t; a.classList.toggle('off', !S.bgmOn||S.muted); }
+  if(b){ b.textContent=t; b.classList.toggle('lock', !S.bgmOn||S.muted); }
+}
+function toggleBgm(){
+  S.bgmOn=!S.bgmOn;
+  if(S.bgmOn){ bgmStart(); SFX.sel(); }
+  else if(BGM.gain&&AC){ BGM.gain.gain.setTargetAtTime(0.0001,AC.currentTime,0.3); SFX.tap(); }
+  syncBgmBtn();
+}
+
+/* ============ 改版新增：情境化教学浮层（just-in-time） ============ */
+let teachCb=null;
+function teachOpen(){ return $('teach').classList.contains('on'); }
+function showTeach(title,body,cb){
+  $('teachT').textContent=title; $('teachB').textContent=body;
+  teachCb=cb||null; $('teach').classList.add('on'); SFX.tick();
+}
+function hideTeach(){
+  if(!teachOpen()) return;
+  $('teach').classList.remove('on'); const cb=teachCb; teachCb=null; if(cb) cb();
+}
+$('teachOk').onclick=()=>{ SFX.tap(); hideTeach(); };
+
+/* ============ 改版新增：回忆线索面板（P0 核心：锁界面永不死锁） ============ */
+function openRecall(){
+  const ch=cur(), box=$('rcList'); box.innerHTML='';
+  const list=(ch.clues||[]).filter(c=>!c.fake);
+  if(!list.length){
+    box.innerHTML='<div class="recall"><div class="rb">这一关没有留下线索——试炼只靠手感与眼力。</div></div>';
+  } else {
+    list.forEach(c=>{ const d=document.createElement('div'); d.className='recall';
+      d.innerHTML='<div class="rt">'+c.label+'</div><div class="rb">'+
+        String(c.text).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>';
+      box.appendChild(d); });
+  }
+  $('rcSum').textContent=ch.name+' · 共 '+list.length+' 条线索。可随时回看，密码从来不靠你背。';
+  openModal('mRecall');
+}
+function setLockBar(on){ const b=$('lockBar'); if(b) b.style.display= on?'flex':'none'; }
+
+/* ============ 改版新增：屏风参考图（降认知负荷，不削碎片相似度） ============ */
+function showRef(){ const img=$('refImg'); if(S.square) img.src=S.square; $('refWrap').style.display='block'; }
+function hideRef(){ const w=$('refWrap'); if(w) w.style.display='none'; }
+function updateRefAvail(){
+  const btn=$('btnRef'); if(!btn) return;
+  if(S.phase!=='PUZZLE'){ btn.classList.add('off'); return; }
+  if(D().key==='hard' || cur().trial){ btn.classList.add('off'); return; }
+  btn.classList.remove('off');
+  if(D().key==='easy' && !S.refShown){ S.refShown=true; showRef(); }
+}
+$('btnRef').onclick=()=>{
+  if(S.phase!=='PUZZLE'){ toast('参考图只在「碎片旋阵」阶段用。'); SFX.tap(); return; }
+  if(cur().trial){ toast('试炼只靠手感与眼力——这里不给参考图。'); SFX.bad(); return; }
+  if(D().key==='hard'){ toast('心象者档不给参考图——这是这一档的规矩。'); SFX.bad(); return; }
+  if($('refWrap').style.display==='block'){ hideRef(); SFX.tap(); return; }
+  if(D().key==='normal'){
+    if(S.hints<=0){ toast('提示次数用完了，参考图换不出来了。'); SFX.bad(); return; }
+    S.hints--; heart(-3); toast('花一次提示，换来屏风全貌。',1800);
+  }
+  showRef(); SFX.sel(); syncHud();
+};
+$('refClose').onclick=()=>{ SFX.tap(); hideRef(); };
 
 /* ============ 特效层：粒子 / 光波 ============ */
 const fx = $('fxcv'), fxc = fx.getContext('2d');
@@ -643,7 +841,11 @@ function syncHud(){
   $('hHeart').textContent = Math.round(S.heart)+'/100';
   const hf=$('hHeartFill'); hf.style.width=clamp(S.heart,0,100)+'%'; hf.classList.toggle('clear', S.echo);
   $('hHint').textContent = S.hints;
-  $('btnHint').disabled = S.hints<=0 || (S.phase!=='HUNT'&&S.phase!=='PUZZLE');
+  $('btnHint').disabled = S.hints<=0 || (S.phase!=='HUNT'&&S.phase!=='PUZZLE'&&S.phase!=='CIPHER');
+  setLockBar(S.phase==='CIPHER');
+  const _lh=$('lbHint'), _ln=$('lbHintN');
+  if(_lh) _lh.disabled = S.hints<=0;
+  if(_ln) _ln.textContent = S.hints;
   if(S.phase==='HUNT'){ $('hFuel').style.width=clamp(S.fuel,0,100)+'%'; }
   const danger=(S.phase==='HUNT'&&S.fuel<=25)||(S.phase==='PUZZLE'&&S.time<=22);
   document.body.classList.toggle('danger', danger && S.tide<=0);
@@ -688,17 +890,23 @@ function renderTitle(){
   }
   $('btnTrial').classList.toggle('lock', !S.save.trial);
   $('btnSound').textContent = '音效：'+(S.muted?'关':'开');
+  syncBgmBtn();
 }
 function startRun(diffIdx, trial){
   S.diff = diffIdx==null? S.diff : diffIdx;
   S.ch = trial? 3 : 0;
   S.score=0; S.combo=1; S.bestCombo=1; S.errors=0; S.heart=0; S.echo=false;
   document.body.classList.remove('echo','dim');
+  S.taught={}; S.refShown=false; S.cipherHelped=0;
+  setLockBar(false); hideRef(); hideTeach();
+  bgmStart();   // 用户手势之后才启动，避免被浏览器拦截
   show('scrGame'); startChapter();
 }
 $('btnHow').onclick=()=>{ SFX.tap(); openModal('mHow'); };
 $('howClose').onclick=()=>{ SFX.tap(); closeModal('mHow'); };
-$('btnSound').onclick=()=>{ S.muted=!S.muted; renderTitle(); if(!S.muted) SFX.sel(); };
+$('btnSound').onclick=()=>{ S.muted=!S.muted; renderTitle();
+  if(BGM.gain&&AC) BGM.gain.gain.setTargetAtTime(bgmVol(),AC.currentTime,0.4);
+  if(!S.muted) SFX.sel(); };
 $('btnWipe').onclick=()=>{ if(confirm('确定清空存档？已收集的信物与最佳积分都会没有。')){
   localStorage.removeItem('shisui_echo_v2'); loadSave(); renderTitle(); toast('存档已清空。'); } };
 $('btnTrial').onclick=()=>{
@@ -750,19 +958,29 @@ function startChapter(){
   $('sceneImg').style.opacity='1';
   $('tray').innerHTML='<span class="tip" id="trayTip"></span>';
   syncHud();
-  playNarr(ch.intro, ()=>{
+  const goPhase=()=>{
     if(ch.trial || !ch.clues.length){ banner('碎片旋阵'); startPuzzle(); }
     else { banner('寻光'); startHunt(); }
+  };
+  playNarr(ch.intro, ()=>{
+    if(S.ch===2 && !S.taught.cross){ S.taught.cross=true;
+      showTeach('第三章的规矩',
+        '外圈是新城，中间十字那五片是旧屏风的主纹——得按仪式顺序放：\n\n'+
+        '中心 → 上 → 下 → 左 → 右\n\n'+
+        '顺序错了，片会烫一下（扣心象、断连击）。\n'+
+        '属于十字的碎片，左上角标着它的位置名（中心/上/下/左/右），照着放就行。', goPhase);
+    } else goPhase();
   });
 }
 function closeAllModals(){ document.querySelectorAll('.modal').forEach(m=>m.classList.remove('on')); }
 
 /* ============ 新机制：暗潮 / 余烬 / 连击衰减 ============ */
 function tickTide(dt){
+  if(teachOpen()) return;
   if(S.tide>0){
     S.tide-=dt;
     if(S.tide<=0){ S.tide=0; document.body.classList.remove('tide'); clearEmbers();
-      toast('暗潮退去了，灯焰重新稳住。',1600); }
+      toast('暗潮退去了，灯焰重新稳住。',1600); bgmDark(false); }
     return;
   }
   S.tideT-=dt;
@@ -773,6 +991,13 @@ function tickTide(dt){
     document.body.classList.add('tide');
     SFX.bad(); shake();
     toast('暗潮压过来了——灯焰缩成豆大！点住飞散的余烬驱散它。',2800);
+    bgmDark(true);
+    if(!S.taught.tide){ S.taught.tide=true;
+      showTeach('暗潮压来了',
+        '灯焰缩成豆大、灯油翻倍地烧——这是暗潮。\n\n'+
+        '此时屋里会飞散出发光的「余烬」：点住它，就能驱散暗潮、回一点灯油、白得一笔积分。\n'+
+        '先别去找记号，抓住余烬最要紧。');
+    }
     spawnEmbers(d.key==='hard'?3:2);
   }
 }
@@ -807,7 +1032,7 @@ function trailEmber(dt,x,y){
 }
 function tickComboDecay(dt){
   if(S.phase!=='HUNT' && S.phase!=='PUZZLE'){ S.lastAct=performance.now(); return; }
-  if(anyModal() || NARR.active) return;
+  if(anyModal() || NARR.active || teachOpen()) return;
   const d=D(), lim = d.key==='hard'?7:(d.key==='normal'?9:13);
   const idle=(performance.now()-S.lastAct)/1000;
   if(idle>lim && S.combo>1){
@@ -845,6 +1070,13 @@ function startHunt(){
   S.lamp.x=w/2; S.lamp.y=h/2;
   syncHud();
   setTip('移动鼠标（或手指）当矿灯 · 灯照到才看得见记号 · 灯油耗尽就输了');
+  if(!S.taught.hunt){ S.taught.hunt=true;
+    showTeach('寻光 · 第一步',
+      '屋里没电：移动鼠标（或手指）就是矿灯，灯照到之处才会浮出记号。\n'+
+      '亮起来的记号，点一下收进账本——每收一件，灯油回一点。\n'+
+      '灯油一直在耗，烧干就输了。\n\n'+
+      '记号里的文字是后面开锁的凭据，但不用背：进锁界面后右下角随时能「回忆线索」。');
+  }
 }
 function setTip(t){ $('trayTip').textContent=t; $('toptext').textContent=t; }
 function clickClue(cl){
@@ -917,7 +1149,7 @@ function huntDraw(dt){
     cl.el.classList.toggle('lit', lit);
   });
   // 灯油消耗
-  S.fuel -= D().drain*dt*(S.echo?0.62:1)*(S.tide>0?2.1:1);
+  if(!teachOpen()) S.fuel -= D().drain*dt*(S.echo?0.62:1)*(S.tide>0?2.1:1);
   if(S.lampShake>0) S.lampShake=Math.max(0,S.lampShake-dt);
   tickTide(dt);
   trailEmber(dt,L.x,L.y);
@@ -930,11 +1162,15 @@ function huntDraw(dt){
 }
 
 /* ============ 阶段二：碎片旋阵 ============ */
+// 每次调用都按本章场景重新生成底图。done 只在本次调用内生效，
+// 既能防止 onload 与超时 fallback 互相覆盖，也不会再复用上一章的缓存。
 function squareScene(idx,size){
   const im=new Image(); im.src=SCENES[Math.min(idx,2)];
   const off=document.createElement('canvas'); off.width=size; off.height=size;
   const c=off.getContext('2d');
-  const draw=()=>{ if(S.square) return; const iw=im.naturalWidth, ih=im.naturalHeight, s=Math.max(size/iw,size/ih);
+  let done=false;
+  const draw=()=>{ if(done) return; done=true;
+    const iw=im.naturalWidth, ih=im.naturalHeight, s=Math.max(size/iw,size/ih);
     const sw=size/s, sh=size/s, sx=(iw-sw)/2, sy=(ih-sh)/2;
     c.fillStyle='#120a05'; c.fillRect(0,0,size,size);
     c.drawImage(im,sx,sy,sw,sh,0,0,size,size);
@@ -946,7 +1182,7 @@ function squareScene(idx,size){
       c.strokeStyle='rgba(181,57,42,'+(0.05+Math.random()*0.10)+')'; c.lineWidth=1+Math.random()*2; c.stroke(); }
     S.square=off.toDataURL('image/jpeg',0.9); layoutPuzzle();
   };
-  const fallback=()=>{ if(S.square) return;
+  const fallback=()=>{ if(done) return; done=true;
     c.fillStyle='#2a1a0f'; c.fillRect(0,0,size,size);
     for(let i=0;i<46;i++){ c.beginPath();
       c.arc(Math.random()*size,Math.random()*size,size*(0.03+Math.random()*0.11),0,7);
@@ -955,7 +1191,7 @@ function squareScene(idx,size){
     S.square=off.toDataURL('image/jpeg',0.9); layoutPuzzle();
   };
   if(im.complete && im.naturalWidth) draw();
-  else { im.onload=draw; im.onerror=fallback; setTimeout(()=>{ if(!S.square) fallback(); },2600); }
+  else { im.onload=draw; im.onerror=fallback; setTimeout(()=>{ if(!done) fallback(); },2600); }
   return off;
 }
 function crossSet(n){ const m=Math.floor(n/2); const set=new Set();
@@ -986,6 +1222,7 @@ function startPuzzle(){
     S.pieces.push({id,r,c,role,order:role?CROSS_ORDER.indexOf(role):-1,rots,el:null,locked:false});
   });
   $('boardWrap').style.display='flex';
+  S.square='';          // 清掉上一章的底图，本章按 SCENES[S.ch] 重新生成
   squareScene(S.ch, 900);
   layoutPuzzle();
   setTip('下盘点选碎片 → 再点它该去的格子'+(rot?' · 已选的碎片再点一次转 90°':'')+(cs?' · 十字五片要按规矩：中心→上→下→左→右':''));
@@ -1023,6 +1260,7 @@ function layoutPuzzle(){
   });
   // 已锁定的贴回棋盘
   S.pieces.filter(p=>p.locked).forEach(p=>placeOnBoard(p));
+  updateRefAvail();
   syncHud();
 }
 function paintTile(t,p,size){
@@ -1102,28 +1340,46 @@ function endPuzzle(){
   flash('#ffe2ac'); { const {w,h}=stageSize(); burst(w/2,h/2,40,'255,225,160'); }
   if(ch.trial){ showResult(true); return; }
   banner('转轮密锁');
-  playNarr(ch.cipher, ()=>{ S.phase='CIPHER'; syncHud(); openCipher(); });
+  hideRef();
+  const goCipher=()=>{ playNarr(ch.cipher, ()=>{ S.phase='CIPHER'; syncHud(); openCipher(); }); };
+  if(ch.cipherRecall){
+    showTeach('屏风显纹', ch.cipherRecall+'\n\n'+
+      '（这段纹路会常驻在锁界面右下角的「回忆线索」里，忘了随时回看。）', goCipher);
+  } else goCipher();
 }
 
 /* ============ 阶段三：转轮密锁 ============ */
-function openCipher(){
+function openCipher(keep){
   const ch=cur();
   $('cTitle').textContent=ch.cipherTitle;
   $('cHint').textContent=ch.cipherHint;
-  const box=$('dials'); box.innerHTML=''; S.dials=[]; S.selDial=0; $('pwin').textContent='';
+  const box=$('dials'); box.innerHTML='';
+  const _kept=keep? S.dials.slice() : null;
+  S.dials=[]; S.selDial=0; $('pwin').textContent='';
   const ans=ch.answer;
+  const keepVals=(_kept && _kept.length===ans.length)? _kept : null;
   for(let i=0;i<ans.length;i++){
-    const d=document.createElement('div'); d.className='dial'+(i===0?' sel':''); d.textContent='0'; d.dataset.v='0';
+    const v0=keepVals? keepVals[i] : '0';
+    const d=document.createElement('div'); d.className='dial'+(i===0?' sel':''); d.textContent=v0; d.dataset.v=v0;
     d.addEventListener('click',()=>{ S.selDial=i; [...box.children].forEach(x=>x.classList.remove('sel'));
       d.classList.add('sel'); SFX.tap(); });
-    box.appendChild(d); S.dials.push('0');
+    box.appendChild(d); S.dials.push(v0);
   }
   const kp=$('keypad'); kp.innerHTML='';
   for(let i=0;i<=9;i++){ const b=document.createElement('button'); b.textContent=i; b.type='button';
     b.addEventListener('click',()=>{ if(S.selDial>=ans.length||S.selDial<0) S.selDial=0;
       setDial(S.selDial,String(i)); S.selDial=Math.min(ans.length-1,S.selDial+1); });
     kp.appendChild(b); }
+  hideRef(); setLockBar(true); syncHud();
   openModal('mCipher'); SFX.tick();
+  if(!S.taught.cipher){ S.taught.cipher=true;
+    showTeach('转轮密锁 · 怎么拨',
+      '① 点一个转轮选中它（红框）；\n'+
+      '② 用 ▲▼ 或下方的数字键拨出数字（也可直接用键盘 0-9、方向键，回车开锁）；\n'+
+      '③ 拨完点「开锁」。\n\n'+
+      '想不起线索？右下角「回忆线索」随时回看本章全部线索；\n'+
+      '还卡着？右下角「提示」会亮出一位转轮上正确的数字（消耗一次提示、影响评级）。');
+  }
 }
 function setDial(i,v){
   const box=$('dials'); const el=box.children[i]; if(!el){ S.selDial=0; syncDialSel(); return; }
@@ -1136,7 +1392,7 @@ function bump(i,delta){
 }
 $('dUp').addEventListener('click',()=>bump(S.selDial,1));
 $('dDn').addEventListener('click',()=>bump(S.selDial,-1));
-$('cClose').addEventListener('click',()=>{ SFX.tap(); closeModal('mCipher'); });
+$('cClose').addEventListener('click',()=>{ SFX.tap(); closeModal('mCipher'); setLockBar(false); toMenu(); });
 $('cOk').addEventListener('click',()=>{
   const ch=cur(); const val=S.dials.join('');
   if(val===ch.answer){
@@ -1173,7 +1429,7 @@ function grade(){
   if(pts>=41) return 'S'; if(pts>=30) return 'A'; if(pts>=18) return 'B'; return 'C';
 }
 function showResult(isTrial){
-  S.phase='RESULT';
+  S.phase='RESULT'; setLockBar(false); hideRef();
   const ch=cur(), g=grade();
   $('rGrade').textContent=g; $('rGrade').className='g'+g;
   $('rTitle').textContent='—— '+(g==='S'?'玛瑙之心':g==='A'?'补城人':g==='B'?'拾碎者':'路过的人')+' ——';
@@ -1218,7 +1474,7 @@ $('rNext').onclick=()=>{
 /* ============ 失败 / 结尾 ============ */
 function failRun(msg){
   if(S.phase==='FAIL') return;
-  S.phase='FAIL'; SFX.fail(); shake();
+  S.phase='FAIL'; setLockBar(false); hideRef(); SFX.fail(); shake();
   $('fBody').textContent=msg+'\n（本章重来：进度与积分回到本章开头。）';
   openModal('mFail');
 }
@@ -1231,8 +1487,9 @@ function toMenu(){
   $('board').innerHTML=''; $('tray').innerHTML='<span class="tip" id="trayTip"></span>';
   $('sceneImg').style.opacity='0';
   document.body.classList.remove('echo','dim','tide','danger');
+  setLockBar(false); hideRef(); hideTeach(); bgmDark(false);
   S.tide=0; S.lampShake=0;
-  renderTitle(); show('scrTitle');
+  renderTitle(); syncBgmBtn(); show('scrTitle');
 }
 $('btnMenu').onclick=()=>{ SFX.tap(); toMenu(); };
 function ending(){
@@ -1246,7 +1503,7 @@ function ending(){
 $('endBack').onclick=()=>{ SFX.tap(); toMenu(); };
 
 /* ============ 提示 ============ */
-$('btnHint').onclick=()=>{
+function useHint(){
   if(S.hints<=0) return;
   if(S.phase==='HUNT'){
     const nxt=S.clues.filter(c=>!c.found&&!c.c.fake);
@@ -1267,9 +1524,29 @@ $('btnHint').onclick=()=>{
     if(cellEl){ cellEl.classList.add('ord'); setTimeout(()=>cellEl.classList.remove('ord'),2600); }
     toast('手里这片是「'+(p.role?CROSS_NAME[p.role]+'区':(p.r+1)+' 行 '+(p.c+1)+' 列')+'」的'+
       (p.rots%360?'，还歪着，点它转正':'')+'。',2600);
+  } else if(S.phase==='CIPHER'){
+    const ans=cur().answer||'';
+    if(!ans){ toast('这一步得你自己拨。'); return; }
+    if(!$('mCipher').classList.contains('on')){ openCipher(true); }
+    let idx=-1; for(let i=0;i<ans.length;i++){ if(S.dials[i]!==ans[i]){ idx=i; break; } }
+    if(idx<0){ toast('转轮都已经对了——点「开锁」。'); return; }
+    S.hints--; heart(-3); S.cipherHelped++;
+    const el=$('dials').children[idx];
+    if(el){ el.classList.remove('hintglow'); void el.offsetWidth; el.classList.add('hintglow');
+      setTimeout(()=>el.classList.remove('hintglow'),2100); }
+    S.selDial=idx; syncDialSel();
+    toast('指尖摸到第 '+(idx+1)+' 位：纹路是「'+ans[idx]+'」。',2800);
   } else { toast('这一步得你自己拨。'); return; }
   SFX.tick(); syncHud();
-};
+}
+$('btnHint').onclick=useHint;
+$('lbHint').onclick=()=>{ SFX.tap(); useHint(); };
+$('lbRecall').onclick=()=>{ SFX.tap(); openRecall(); };
+$('lbCipher').onclick=()=>{ SFX.tap(); openCipher(true); };
+$('rcClose').onclick=()=>{ SFX.tap(); closeModal('mRecall'); };
+$('rcHow').onclick=()=>{ SFX.tap(); closeModal('mRecall'); openModal('mHow'); };
+$('btnBgm').onclick=toggleBgm;
+$('btnBgm2').onclick=toggleBgm;
 
 /* ============ 图鉴 ============ */
 function renderDex(){
@@ -1310,6 +1587,8 @@ stage.addEventListener('touchmove',e=>{ const p=pointAt(e); S.pointer.x=p.x; S.p
   {passive:true});
 document.addEventListener('keydown',e=>{
   if(NARR.active && (e.key===' '||e.key==='Enter')){ e.preventDefault(); $('narr').click(); return; }
+  if(e.key==='Escape'){ if(teachOpen()){ hideTeach(); return; }
+    if($('mRecall').classList.contains('on')){ closeModal('mRecall'); return; } }
   if(S.phase==='PUZZLE' && (e.key==='Escape')){ S.pieces.forEach(q=>{ q.sel=false; if(q.el) q.el.classList.remove('sel'); });
     S.sel=-1; }
   if(S.phase==='CIPHER' && document.getElementById('mCipher').classList.contains('on')){
@@ -1341,7 +1620,7 @@ function loop(t){
     S.lamp.r += (D().lamp*(0.72+0.28*(S.fuel/100)) - S.lamp.r)*Math.min(1,dt*2.2);
     huntDraw(dt);
   } else if(S.phase==='PUZZLE'){
-    if(!anyModal()) S.time-=dt;
+    if(!anyModal() && !teachOpen()) S.time-=dt;
     if(S.time<=0){ S.time=0; syncHud(); failRun('天亮了。拆迁队的车已经堵在巷口，屏风还散着。'); }
     else syncHud();
   }
