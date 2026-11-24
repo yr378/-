@@ -488,7 +488,7 @@ const CH = [
 { key:'ch1', answer:'31462', name:'第一章 · 矿灯', relic:'矿灯',
   relicDesc:'老赵举高的那盏灯，照过爷爷下井的第一条路。',
   grid:{easy:4, normal:4, hard:5}, rotate:{easy:false, normal:true, hard:true},
-  time:{easy:145, normal:108, hard:80},
+  time:{easy:185, normal:140, hard:105},
   cipherTitle:'炕沿木匣 · 五转轮锁',
   cipherHint:'按墙上照片 ①→⑤ 的顺序读出名字，再翻抽屉里的老账本，查每人名下的灯点数，连成五位数。',
   intro:[
@@ -516,7 +516,7 @@ const CH = [
 { key:'ch2', answer:'3219', name:'第二章 · 集市', relic:'算盘珠',
   relicDesc:'秤钩、棚檐、珠串、酒盅，一杆秤称的是人情。',
   grid:{easy:4, normal:5, hard:6}, rotate:{easy:false, normal:true, hard:true},
-  time:{easy:170, normal:132, hard:100},
+  time:{easy:215, normal:168, hard:130},
   cipherTitle:'集市音乐盒 · 四位孔键',
   cipherHint:'先把拓片对齐：从「口」字门出发的路线经过四个摊。听每摊的叫卖行话——句尾那个数才是真的。',
   intro:[
@@ -543,7 +543,7 @@ const CH = [
 { key:'ch3', answer:'1949', name:'第三章 · 新生', relic:'玛瑙纹',
   relicDesc:'矿灯照过路，集市称过斤两，砂盘磨出过红。',
   grid:{easy:5, normal:5, hard:5}, rotate:{easy:false, normal:true, hard:true},
-  time:{easy:200, normal:160, hard:128},
+  time:{easy:250, normal:200, hard:160},
   cipherTitle:'屏风底座 · 年份凹槽',
   cipherHint:'中间那五片是旧屏风的主纹，得按规矩来。拼好后底座显出四位凹槽——「这座城记事儿那年」。',
   intro:[
@@ -571,7 +571,7 @@ const CH = [
 { key:'trial', name:'试炼 · 玛瑙之心', relic:'玛瑙之心',
   relicDesc:'试炼之物。四十九片归位，只靠手感与眼力复原。',
   grid:{easy:6, normal:7, hard:7}, rotate:{easy:false, normal:true, hard:true},
-  time:{easy:250, normal:198, hard:165}, trial:true,
+  time:{easy:290, normal:235, hard:200}, trial:true,
   cipherTitle:'', cipherHint:'',
   intro:[
     {who:'？',t:'三堆碎片都回来了。屏风深处，还剩最后一块——玛瑙之心。'},
@@ -646,7 +646,7 @@ const SFX = {
 /* 严格在玩家点击难度卡（用户手势）之后才启动，绕开 Chrome/Safari 自动播放拦截 */
 const BGM={started:false,gain:null,filt:null,drone:[],timer:null,dark:false,next:0};
 const BGM_SCALE=[220,261.63,293.66,329.63,392.00,440.00,523.25];
-function bgmVol(){ return (S.bgmOn && !S.muted) ? (BGM.dark?0.10:0.28) : 0.0001; }
+function bgmVol(){ return (S.bgmOn && !S.muted) ? (BGM.dark?0.20:0.52) : 0.0001; }
 function bgmStart(){
   const a=actx(); if(!a) return;
   if(!BGM.started){
@@ -672,7 +672,7 @@ function bgmSchedule(){
   while(BGM.next < a.currentTime+0.7){
     if(S.bgmOn && !S.muted){
       const n=BGM_SCALE[Math.floor(Math.random()*BGM_SCALE.length)]*(BGM.dark?0.5:1);
-      const t0=BGM.next, v=BGM.dark?0.018:0.034;
+      const t0=BGM.next, v=BGM.dark?0.036:0.080;
       const o=a.createOscillator(), g=a.createGain();
       o.type='sine'; o.frequency.value=n;
       g.gain.setValueAtTime(0.0001,t0); g.gain.linearRampToValueAtTime(v,t0+0.3);
@@ -851,7 +851,7 @@ function syncHud(){
   document.body.classList.toggle('danger', danger && S.tide<=0);
 }
 function loadSave(){ let s={}; try{ s=JSON.parse(localStorage.getItem('shisui_echo_v2')||'{}'); }catch(e){ s={}; }
-  S.save={unlocked:s.unlocked||0, relics:s.relics||[], players:s.players||0, best:s.best||{}, trial:s.trial||false}; }
+  S.save={unlocked:s.unlocked||0, relics:s.relics||[], players:s.players||0, best:s.best||{}, trial:s.trial||false, prog:s.prog||null, fur:s.fur||{}}; }
 function writeSave(){ try{ localStorage.setItem('shisui_echo_v2',JSON.stringify(S.save)); }catch(e){} }
 function bestText(key){ const b=S.save.best[D().key]||{}; return b[key]? ('最佳 '+b[key]+' 分') : '尚无记录'; }
 
@@ -879,7 +879,15 @@ function renderTitle(){
     const b=document.createElement('button'); b.className='dcard '+d.cls;
     b.innerHTML='<div class="dn">'+d.name+'</div><div class="ds">'+d.sub+'</div>'+
       '<div class="db">'+d.desc+'<br>'+bestText('total')+'</div>';
-    b.onclick=()=>{ SFX.tap(); S.diff=i; startRun(i); };
+    b.onclick=()=>{ SFX.tap(); S.diff=i; var _fc=(S.save.fur&&S.save.fur[i])||0;
+      if(_fc>=1&&_fc<=2){
+        if(confirm('发现上次进度：'+d.name+' · 已玩到第'+(_fc)+'章。\n点「确定」接着从第'+(_fc+1)+'章继续，点「取消」从头重玩。')){
+          startRun(i,false,_fc); toast('已读取上次进度：从第'+(_fc+1)+'章继续');
+        } else {
+          try{ if(S.save.prog&&S.save.prog.diff===i) delete S.save.prog; if(S.save.fur)S.save.fur[i]=0; writeSave(); }catch(e){}
+          startRun(i);
+        }
+      } else startRun(i); };
     box.appendChild(b);
   });
   const rl=$('rankLine');
@@ -892,9 +900,9 @@ function renderTitle(){
   $('btnSound').textContent = '音效：'+(S.muted?'关':'开');
   syncBgmBtn();
 }
-function startRun(diffIdx, trial){
+function startRun(diffIdx, trial, resumeCh){
   S.diff = diffIdx==null? S.diff : diffIdx;
-  S.ch = trial? 3 : 0;
+  S.ch = trial? 3 : (resumeCh!=null? resumeCh : 0);
   S.score=0; S.combo=1; S.bestCombo=1; S.errors=0; S.heart=0; S.echo=false;
   document.body.classList.remove('echo','dim');
   S.taught={}; S.refShown=false; S.cipherHelped=0;
@@ -958,6 +966,7 @@ function startChapter(){
   $('sceneImg').style.opacity='1';
   $('tray').innerHTML='<span class="tip" id="trayTip"></span>';
   syncHud();
+  if(!ch.trial){ try{ S.save.prog={diff:S.diff, ch:S.ch}; S.save.fur[S.diff]=Math.max(S.save.fur[S.diff]||0,S.ch); writeSave(); }catch(e){} }
   const goPhase=()=>{
     if(ch.trial || !ch.clues.length){ banner('碎片旋阵'); startPuzzle(); }
     else { banner('寻光'); startHunt(); }
@@ -1205,7 +1214,7 @@ function crossRole(r,c,n){ const m=Math.floor(n/2);
   return 'right'; }
 function startPuzzle(){
   const ch=cur(), d=D();
-  S.phase='PUZZLE'; S.locked=0; S.sel=-1; S.crossNext=0;
+  S.phase='PUZZLE'; S.locked=0; S.sel=-1; S.crossNext=0; S.streak=0;
   const n = ch.grid[d.key];
   S.rows=n; S.cols=n;
   S.timeLimit = ch.time[d.key]; S.time=S.timeLimit; S.phaseStart=performance.now();
@@ -1304,22 +1313,26 @@ function clickCell(idx,cellEl){
   // 十字仪式顺序
   if(p.role && p.order!==S.crossNext){
     SFX.bad(); shake(); p.el.classList.remove('bad'); void p.el.offsetWidth; p.el.classList.add('bad');
-    heart(-6); S.combo=1;
+    heart(-6); S.combo=1; S.streak=0;
     toast('这五片在你手里烫了一下——该放「'+CROSS_NAME[CROSS_ORDER[S.crossNext]]+'」片。',2400);
     syncHud(); return;
   }
   if(idx!==p.id){
-    S.errors++; S.combo=1; heart(-7); S.time=Math.max(1,S.time-4); SFX.bad(); shake();
+    S.errors++; S.combo=1; S.streak=0; heart(-7); S.time=Math.max(1,S.time-4); SFX.bad(); shake();
     p.el.classList.remove('bad'); void p.el.offsetWidth; p.el.classList.add('bad');
     toast('纹路对不上——碎片弹回，时限 -4 秒。',1800); syncHud(); return;
   }
   if(p.rots%360!==0){
-    S.errors++; S.combo=1; heart(-5); S.time=Math.max(1,S.time-2); SFX.bad();
+    S.errors++; S.combo=1; S.streak=0; heart(-5); S.time=Math.max(1,S.time-2); SFX.bad();
     p.el.classList.remove('bad'); void p.el.offsetWidth; p.el.classList.add('bad');
     toast('方向还歪着——再点它一下转正（时限 -2 秒）。',1900); syncHud(); return;
   }
   // 正确
   p.locked=true; S.locked++;
+  S.streak=(S.streak||0)+1;
+  if(S.streak%3===0){ const add=Math.round(S.timeLimit*0.06);
+    S.time=Math.min(S.timeLimit+120,S.time+add);
+    banner('连对奖励 +'+add+'秒'); toast('连续拼对 '+S.streak+' 块，奖励时限 +'+add+' 秒！',2200); SFX.star(); }
   if(p.role) S.crossNext++;
   const gain=Math.round(90*S.combo*D().scoreMul*(S.echo?2:1));
   S.score+=gain; S.combo=Math.min(9,S.combo+1); S.bestCombo=Math.max(S.bestCombo,S.combo);
@@ -1493,7 +1506,7 @@ function toMenu(){
 }
 $('btnMenu').onclick=()=>{ SFX.tap(); toMenu(); };
 function ending(){
-  S.phase='END'; S.save.players=(S.save.players||0)+1; writeSave();
+  S.phase='END'; S.save.players=(S.save.players||0)+1; try{ delete S.save.prog; if(S.save.fur)S.save.fur[S.diff]=0; }catch(e){} writeSave();
   const lines=['屏风拼完了。','它刻的不是哪一年的城，','是一代一代人把日子过下来的样子。','',
     '灯给人照过路，人就得替灯记着路。','','谨以此片，献给把日子拼起来的人。','取材自口述记忆 · 阜新'];
   $('endText').innerHTML=lines.map((l,i)=>'<div class="'+(i>=6?'big':'')+'" style="animation-delay:'+(i*0.42)+'s">'+l+'</div>').join('');
@@ -1632,6 +1645,7 @@ window.addEventListener('error',ev=>{ try{ toast('画面打了个趔趄，已自
 resize(); loadSave(); renderTitle();
 $('sceneImg').style.opacity='0';
 requestAnimationFrame(loop);
+/* 续玩进度改为在「选择难度」时按各难度分别提示，打开游戏不再自动弹窗 */
 window.__T = { S, startRun, startChapter, startPuzzle, endPuzzle, openCipher, cur, DIFFS,
   answer:()=>cur().answer, grade, tickTide, spawnEmbers, clearEmbers, heart,
   clickClue, clickCell, clickTile, setDial, failRun, toMenu, showResult };
