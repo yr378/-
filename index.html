@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>拾光记忆玛瑙城</title>
+<meta name="description" content="拾光记忆玛瑙城：以阜新玛瑙与老城记忆为题材的拼图解谜小游戏。三章故事、三种难度、试炼关卡，浏览器打开即玩，进度自动保存。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23150d07'/><circle cx='32' cy='32' r='23' fill='none' stroke='%23b5392a' stroke-width='3'/><circle cx='32' cy='32' r='14' fill='none' stroke='%23c89a55' stroke-width='3'/><circle cx='32' cy='32' r='5' fill='%23ffc96a'/></svg>">
 <style>
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -95,6 +97,10 @@ body.dim #stage{filter:brightness(.62)}
 .clue:before{content:'';position:absolute;inset:22px;border-radius:50%;border:1.5px solid rgba(255,225,160,.85);
   animation:cl 1.6s ease-in-out infinite}
 @keyframes cl{0%,100%{transform:scale(.72);opacity:.5}50%{transform:scale(1.12);opacity:1}}
+.clue.fake{border:1.5px dashed rgba(196,192,184,.72);
+  background:radial-gradient(circle,rgba(150,148,142,.12),rgba(150,148,142,0) 70%)}
+.clue.fake:before{content:'';position:absolute;inset:22px;border-radius:50%;
+  border:1.5px dashed rgba(206,203,196,.6);animation:none}
 .clue.lit{opacity:1;pointer-events:auto}
 .clue.gone{animation:burst .5s ease-out forwards;pointer-events:none}
 @keyframes burst{0%{opacity:1;transform:scale(.6)}100%{opacity:0;transform:scale(2.4)}}
@@ -268,8 +274,10 @@ body.danger #vig{background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 28%
 @media (max-width:640px){
   .ember{width:46px;height:46px;margin:-23px 0 0 -23px}
   .rankline{font-size:11.5px}
-  #toast{top:64px}
+  #toast{top:auto;bottom:33vh}
 }
+
+#cfB{white-space:pre-line;line-height:1.9}
 
 /* ==================== 试玩改版新增样式 ==================== */
 /* 情境化教学浮层 */
@@ -312,7 +320,7 @@ body.danger #vig{background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 28%
 #refClose:hover{color:#ffc96a;border-color:#ffc96a}
 .ibtn.off{opacity:.45}
 @media (max-width:640px){
-  #refWrap{width:min(140px,36vw);top:108px;right:6px;padding:5px 6px 6px}
+  #refWrap{width:min(140px,36vw);top:150px;right:6px;padding:5px 6px 6px}
   #lockBar{right:6px;bottom:8px;gap:6px}#lockBar button{padding:7px 12px;font-size:12px}
   #teach .tb{font-size:13.5px;line-height:1.95}
 }
@@ -438,7 +446,7 @@ body.danger #vig{background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 28%
 <div class="modal" id="mHow"><div class="card">
   <h3>玩法说明</h3>
   <ul class="howlist">
-    <li><b>一 · 寻光</b>：屋里没电。移动鼠标（手指）就是矿灯，灯照到之处才会浮出记号；点亮的记号点一下收进账本。灯油一直在耗，收到记号会回油——油尽则灯灭。</li>
+    <li><b>一 · 寻光</b>：屋里没电。移动鼠标（手指）就是矿灯，灯照到之处才会浮出记号；点亮的记号点一下收进账本。灯油一直在耗，收到记号会回油——油尽则灯灭。<b>灯下金色实心圆环是真记号，灰色虚线轮廓是假记号</b>——点它会泼掉一捧灯油，绕开它。</li>
     <li><b>二 · 碎片旋阵</b>：先在下方托盘点选一片碎片（困难难度下碎片是歪的，再点一次可转 90°），再点它该去的格子。放对会「咔」地锁死并涨连击；放错弹回、断连击。</li>
     <li><b>三 · 转轮密锁</b>：拼完屏风，锁才认得路。按线索里的顺序拨数字转轮（点转轮选中，用 ▲▼ 或下方数字键），点对即开。</li>
     <li><b>心象值</b>：连续做对会积攒心象，满值进入「心象清晰」——画面变亮、积分翻倍、灯油耗得慢。连续做错会黯淡，画面发暗。</li>
@@ -448,10 +456,16 @@ body.danger #vig{background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 28%
     <li><b>参考图</b>：拼图阶段右上角可开「屏风全貌」。初探者档默认给（可关掉）；寻路者档要花一次提示才打开；心象者档与试炼关不给。</li>
     <li><b>暗潮</b>：寻光途中会忽然压来一阵暗潮——灯焰缩成豆大、灯油翻倍地烧。此时会飞散出发光的<b>余烬</b>，点住它就能驱散暗潮、回一点灯油、白得一笔积分。</li>
     <li><b>连击会凉</b>：手一慢，连击就往下掉（困难 7 秒、普通 9 秒、简单 13 秒不动手即掉一级）。放错碎片还要倒扣时限，别乱点。</li>
-    <li><b>锁会咬人</b>：普通与困难难度下，开锁失败时锁膛里的铜屑会<b>拨乱一位转轮</b>；困难档只有 3 次机会。</li>
+    <li><b>锁会咬人</b>：普通与困难难度下，开锁失败时锁膛里的铜屑会<b>拨乱一位转轮</b>；困难档连续失败 3 次后锁退回原位重拨，屏风不受影响。</li>
     <li><b>评级</b>：S / A / B / C 由用时、连击、失误、提示数共同决定，对应称号「玛瑙之心 / 补城人 / 拾碎者 / 路过的人」。通关后解锁「试炼 · 玛瑙之心」——最多四十九片，限时，只靠手感。</li>
   </ul>
   <div class="row"><button class="btn" id="howClose">明白了</button></div>
+</div></div>
+
+<!-- 改版新增：游戏内确认弹窗（替代原生 confirm） -->
+<div class="modal" id="mConfirm"><div class="card">
+  <h3 id="cfT">确认</h3><p id="cfB"></p>
+  <div class="row"><button class="btn min" id="cfNo">取消</button><button class="btn" id="cfOk">确定</button></div>
 </div></div>
 
 <!-- 情境化教学浮层 -->
@@ -593,7 +607,7 @@ const DIFFS = [
  {key:'normal',cls:'n', name:'寻路者', sub:'普 通', drain:3.7, lamp:148, fuelBack:18, rotate:true,
   decoys:3, hints:3, tries:99, scoreMul:1.45, desc:'灯油急耗 · 3 假记号会游动 · 碎片歪斜 · 暗潮来袭'},
  {key:'hard',  cls:'h', name:'心象者', sub:'困 难', drain:5.6, lamp:110, fuelBack:13, rotate:true,
-  decoys:6, hints:2, tries:3, scoreMul:1.95, desc:'灯油枯竭 · 6 假记号 · 记号游动 · 暗潮更凶 · 锁限 3 次'}
+  decoys:6, hints:2, tries:3, scoreMul:1.95, desc:'灯油枯竭 · 6 假记号 · 记号游动 · 暗潮更凶 · 锁3次后退回重拨'}
 ];
 
 /* ============ 状态 ============ */
@@ -669,7 +683,11 @@ function bgmStart(){
 }
 function bgmSchedule(){
   const a=AC; if(!a||!BGM.started||!BGM.gain) return;
-  while(BGM.next < a.currentTime+0.7){
+  /* 后台标签页里 setInterval 会被浏览器节流到 1 秒一次，时间轴严重落后时
+     一次性补排会瞬间生成上百个音符，造成爆音甚至卡顿，这里直接跳到当前时刻 */
+  if(BGM.next < a.currentTime-0.4) BGM.next = a.currentTime+0.15;
+  let guard=0;
+  while(BGM.next < a.currentTime+0.7 && guard++<8){
     if(S.bgmOn && !S.muted){
       const n=BGM_SCALE[Math.floor(Math.random()*BGM_SCALE.length)]*(BGM.dark?0.5:1);
       const t0=BGM.next, v=BGM.dark?0.036:0.080;
@@ -693,6 +711,14 @@ function bgmDark(on){
   BGM.gain.gain.setTargetAtTime(bgmVol(), AC.currentTime, 0.4);
   BGM.filt.frequency.setTargetAtTime(on?400:2300, AC.currentTime, 0.5);
 }
+/* 回到前台时重置音乐时间轴并恢复音量，避免切标签页回来后的爆音与哑音 */
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden && BGM.started && AC){
+    BGM.next=AC.currentTime+0.2;
+    if(AC.state==='suspended') AC.resume().catch(()=>{});
+    BGM.gain.gain.setTargetAtTime(bgmVol(), AC.currentTime, 0.5);
+  }
+});
 function syncBgmBtn(){
   const t='音乐：'+(S.bgmOn&&!S.muted?'开':'关');
   const a=$('btnBgm'), b=$('btnBgm2');
@@ -853,7 +879,7 @@ function syncHud(){
 function loadSave(){ let s={}; try{ s=JSON.parse(localStorage.getItem('shisui_echo_v2')||'{}'); }catch(e){ s={}; }
   S.save={unlocked:s.unlocked||0, relics:s.relics||[], players:s.players||0, best:s.best||{}, trial:s.trial||false, prog:s.prog||null, fur:s.fur||{}}; }
 function writeSave(){ try{ localStorage.setItem('shisui_echo_v2',JSON.stringify(S.save)); }catch(e){} }
-function bestText(key){ const b=S.save.best[D().key]||{}; return b[key]? ('最佳 '+b[key]+' 分') : '尚无记录'; }
+function bestText(key,di){ const b=S.save.best[DIFFS[di==null?S.diff:di].key]||{}; return b[key]? ('最佳 '+b[key]+' 分') : '尚无记录'; }
 
 /* ============ 心象值 ============ */
 function heart(delta){
@@ -878,22 +904,21 @@ function renderTitle(){
   DIFFS.forEach((d,i)=>{
     const b=document.createElement('button'); b.className='dcard '+d.cls;
     b.innerHTML='<div class="dn">'+d.name+'</div><div class="ds">'+d.sub+'</div>'+
-      '<div class="db">'+d.desc+'<br>'+bestText('total')+'</div>';
+      '<div class="db">'+d.desc+'<br>'+bestText('total',i)+'</div>';
     b.onclick=()=>{ SFX.tap(); S.diff=i; var _fc=(S.save.fur&&S.save.fur[i])||0;
       if(_fc>=1&&_fc<=2){
-        if(confirm('发现上次进度：'+d.name+' · 已玩到第'+(_fc)+'章。\n点「确定」接着从第'+(_fc+1)+'章继续，点「取消」从头重玩。')){
-          startRun(i,false,_fc); toast('已读取上次进度：从第'+(_fc+1)+'章继续');
-        } else {
-          try{ if(S.save.prog&&S.save.prog.diff===i) delete S.save.prog; if(S.save.fur)S.save.fur[i]=0; writeSave(); }catch(e){}
-          startRun(i);
-        }
+        askConfirm('发现上次进度',
+          d.name+' · 已玩到第'+_fc+'章。\n点「继续上次」从第'+(_fc+1)+'章接着玩；点「从头重玩」会清除该难度的续玩进度。',
+          '继续上次','从头重玩',
+          function(){ startRun(i,false,_fc); toast('已读取上次进度：从第'+(_fc+1)+'章继续'); },
+          function(){ try{ if(S.save.prog&&S.save.prog.diff===i) delete S.save.prog; if(S.save.fur)S.save.fur[i]=0; writeSave(); }catch(e){} startRun(i); });
       } else startRun(i); };
     box.appendChild(b);
   });
   const rl=$('rankLine');
-  if(rl){ const bb=(S.save.best[DIFFS[S.diff].key]||{}).total||0;
-    const tg=S.save.trial?'试炼已解锁':'试炼未解锁';
-    rl.innerHTML='已收信物 <b>'+S.save.relics.length+' / '+CH.length+'</b> · 本难度最佳 <b>'+bb+'</b> 分 · '+tg
+  if(rl){ const tg=S.save.trial?'试炼已解锁':'试炼未解锁';
+    const per=DIFFS.map(d=>d.sub.replace(/\s/g,'')+' <b>'+(((S.save.best[d.key]||{}).total)||0)+'</b>').join(' · ');
+    rl.innerHTML='已收信物 <b>'+S.save.relics.length+' / '+CH.length+'</b> · 最佳分 '+per+' · '+tg
       +(S.save.players? ' · 已拼合 <b>'+S.save.players+'</b> 次':'');
   }
   $('btnTrial').classList.toggle('lock', !S.save.trial);
@@ -915,8 +940,10 @@ $('howClose').onclick=()=>{ SFX.tap(); closeModal('mHow'); };
 $('btnSound').onclick=()=>{ S.muted=!S.muted; renderTitle();
   if(BGM.gain&&AC) BGM.gain.gain.setTargetAtTime(bgmVol(),AC.currentTime,0.4);
   if(!S.muted) SFX.sel(); };
-$('btnWipe').onclick=()=>{ if(confirm('确定清空存档？已收集的信物与最佳积分都会没有。')){
-  localStorage.removeItem('shisui_echo_v2'); loadSave(); renderTitle(); toast('存档已清空。'); } };
+$('btnWipe').onclick=()=>{ askConfirm('清空存档',
+  '确定清空存档？已收集的信物、最佳积分与各难度续玩进度都会没有，且无法恢复。',
+  '清空存档','取消',
+  function(){ try{ localStorage.removeItem('shisui_echo_v2'); }catch(e){} loadSave(); renderTitle(); toast('存档已清空。'); }); };
 $('btnTrial').onclick=()=>{
   if(!S.save.trial){ toast('通关三章后开启。'); return; }
   SFX.tap(); startRun(S.diff,true);
@@ -926,6 +953,16 @@ $('btnTrial').onclick=()=>{
 function openModal(id){ $(id).classList.add('on'); }
 function closeModal(id){ $(id).classList.remove('on'); }
 function anyModal(){ return !!document.querySelector('.modal.on'); }
+/* 改版新增：游戏内确认弹窗。原生 confirm 在微信/QQ 等内嵌浏览器里会被屏蔽并直接返回 false，
+   导致「续玩提示」「清空存档」在手机上完全失效，故统一改用页面内弹窗。 */
+let cfCb=null;
+function askConfirm(title,body,okTxt,noTxt,onOk,onNo){
+  $('cfT').textContent=title; $('cfB').textContent=body;
+  $('cfOk').textContent=okTxt||'确定'; $('cfNo').textContent=noTxt||'取消';
+  cfCb={ok:onOk||null,no:onNo||null}; openModal('mConfirm');
+}
+$('cfOk').onclick=()=>{ SFX.tap(); closeModal('mConfirm'); const c=cfCb; cfCb=null; if(c&&c.ok) c.ok(); };
+$('cfNo').onclick=()=>{ SFX.tap(); closeModal('mConfirm'); const c=cfCb; cfCb=null; if(c&&c.no) c.no(); };
 
 /* ============ 旁白 ============ */
 const NARR={list:[],i:0,cur:'',shown:0,cb:null,active:false,prev:'TITLE'};
@@ -957,7 +994,7 @@ function tickNarr(){
 /* ============ 章节启动 ============ */
 function startChapter(){
   const ch=cur(), d=D();
-  S.locked=0; S.crossNext=0; S.sel=-1; S.found=0; S.idle=0; S.tries=d.tries;
+  S.locked=0; S.crossNext=0; S.sel=-1; S.found=0; S.idle=0; S.tries=d.tries; S.chStartScore=S.score;
   S.hints=d.hints; S.cipherAns = ch.answer || '';
   closeAllModals();
   $('boardWrap').style.display='none'; $('fuelWrap').style.display='none';
@@ -1069,7 +1106,7 @@ function startHunt(){
   });
   // 假记号：点了扣灯油
   for(let i=0;i<d.decoys;i++){
-    const el=document.createElement('button'); el.className='clue'; el.type='button';
+    const el=document.createElement('button'); el.className='clue fake'; el.type='button';
     lay.appendChild(el);
     S.clues.push({c:{label:ch.decoy[i%ch.decoy.length],text:'凑近才看得清——不是记号，是年头留下的痕迹。\n（假记号：点它会泼掉一捧灯油。）',fake:true},
       el,fx:0.1+Math.random()*0.8,fy:0.14+Math.random()*0.72,found:false,seed:9+i,seed2:i,vx:0,vy:0});
@@ -1083,6 +1120,7 @@ function startHunt(){
     showTeach('寻光 · 第一步',
       '屋里没电：移动鼠标（或手指）就是矿灯，灯照到之处才会浮出记号。\n'+
       '亮起来的记号，点一下收进账本——每收一件，灯油回一点。\n'+
+      '金色实线圆环＝真记号；灰色虚线圆环＝假记号，点它会泼掉灯油。\n'+
       '灯油一直在耗，烧干就输了。\n\n'+
       '记号里的文字是后面开锁的凭据，但不用背：进锁界面后右下角随时能「回忆线索」。');
   }
@@ -1340,8 +1378,7 @@ function clickCell(idx,cellEl){
   const r=cellEl.getBoundingClientRect(); burst(r.left+r.width/2,r.top+r.height/2,20);
   if(p.el && p.el.parentNode) p.el.parentNode.removeChild(p.el);
   S.sel=-1;
-  const openN=S.pieces.length-S.locked;
-  if(openN>0) layoutPuzzle(); else layoutPuzzle();
+  layoutPuzzle();
   syncHud();
   if(S.locked===S.pieces.length) setTimeout(endPuzzle,420);
 }
@@ -1381,7 +1418,7 @@ function openCipher(keep){
   const kp=$('keypad'); kp.innerHTML='';
   for(let i=0;i<=9;i++){ const b=document.createElement('button'); b.textContent=i; b.type='button';
     b.addEventListener('click',()=>{ if(S.selDial>=ans.length||S.selDial<0) S.selDial=0;
-      setDial(S.selDial,String(i)); S.selDial=Math.min(ans.length-1,S.selDial+1); });
+      setDial(S.selDial,String(i)); S.selDial=Math.min(ans.length-1,S.selDial+1); syncDialSel(); });
     kp.appendChild(b); }
   hideRef(); setLockBar(true); syncHud();
   openModal('mCipher'); SFX.tick();
@@ -1428,8 +1465,18 @@ $('cOk').addEventListener('click',()=>{
       toast('锁膛里铜屑一响——第 '+(ri+1)+' 位转轮被拨乱了。',2300);
     }
     S.selDial=0;
-    $('pwin').textContent = '锁纹丝不动……再想想。（还能试 '+S.tries+' 次）';
-    if(S.tries<=0) failRun('转轮卡死了。锁眼里的铜屑，是爷爷那辈人拨出来的。');
+    if(S.tries>0){
+      $('pwin').textContent = '锁纹丝不动……再想想。（还能试 '+S.tries+' 次）';
+    } else {
+      $('pwin').textContent = '锁膛卡死，转轮退回原位——再来！';
+    }
+    if(S.tries<=0){
+      S.tries=D().tries;
+      toast('锁膛彻底卡死了——屏风纹丝不动，转轮退回原位，重新拨。',3400);
+      SFX.fail(); shake();
+      setTimeout(()=>openCipher(),620);
+      return;
+    }
     syncHud();
   }
 });
@@ -1491,7 +1538,7 @@ function failRun(msg){
   $('fBody').textContent=msg+'\n（本章重来：进度与积分回到本章开头。）';
   openModal('mFail');
 }
-$('fRetry').onclick=()=>{ SFX.tap(); closeModal('mFail'); startChapter(); };
+$('fRetry').onclick=()=>{ SFX.tap(); closeModal('mFail'); if(typeof S.chStartScore==='number')S.score=S.chStartScore; startChapter(); };
 $('fMenu').onclick=()=>{ SFX.tap(); closeModal('mFail'); toMenu(); };
 function toMenu(){
   S.phase='TITLE'; S.ch=0; closeAllModals();
@@ -1597,6 +1644,9 @@ function pointAt(e){
 }
 stage.addEventListener('mousemove',e=>{ const p=pointAt(e); S.pointer.x=p.x; S.pointer.y=p.y; S.pointer.has=true; });
 stage.addEventListener('touchmove',e=>{ const p=pointAt(e); S.pointer.x=p.x; S.pointer.y=p.y; S.pointer.has=true; },
+  {passive:true});
+/* 手机上进关卡后手指按下即把矿灯挪到指尖，不必先拖动才亮 */
+stage.addEventListener('touchstart',e=>{ const p=pointAt(e); S.pointer.x=p.x; S.pointer.y=p.y; S.pointer.has=true; },
   {passive:true});
 document.addEventListener('keydown',e=>{
   if(NARR.active && (e.key===' '||e.key==='Enter')){ e.preventDefault(); $('narr').click(); return; }
